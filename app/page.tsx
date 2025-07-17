@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Mycarousel } from '@/components/ui/Mycarousel';
+
 import WeatherCard from '../components/ui/WeatherCard'
 import NigerianState from '../components/ui/NigerianState'
 export default function Home() {
