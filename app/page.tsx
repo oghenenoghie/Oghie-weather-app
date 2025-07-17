@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import WeatherCard from '../components/ui/WeatherCard'
 import NigerianState from '../components/ui/NigerianState'
 export default function Home() {
