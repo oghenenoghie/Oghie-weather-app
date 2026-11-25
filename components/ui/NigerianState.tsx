@@ -1,109 +1,123 @@
-// components/WeatherNigeria.tsx
 "use client";
-import LoadingSpinner from "./LoadingSpinner";
+
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Image from "next/image";
+import { Cloud, Droplets, MapPinned, Wind } from "lucide-react";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface WeatherData {
-    location: {
-        name: string;
-        localtime: string;
-    };
-    current: {
-        temp_c: number;
-        condition: { text: string; icon: string };
-        feelslike_c: number;
-        humidity: number;
-        wind_kph: number;
-    };
+  location: { name: string; localtime: string };
+  current: {
+    temp_c: number;
+    condition: { text: string; icon: string };
+    feelslike_c: number;
+    humidity: number;
+    wind_kph: number;
+  };
 }
 
 const NIGERIA_STATES = [
-    "Lagos", "Abuja", "Kano", "Kaduna", "Rivers", "Oyo", "Enugu", "Benue", "Borno", "Edo",
-    "Delta", "Anambra", "Cross River", "Akwa Ibom", "Imo", "Osun", "Ekiti", "Kwara", "Ondo", "Bauchi",
-    "Niger", "Plateau", "Kogi", "Sokoto", "Zamfara", "Kebbi", "Taraba", "Yobe", "Adamawa", "Gombe",
-    "Jigawa", "Nasarawa", "Bayelsa", "Ebonyi", "Abia", "Katsina"
+  "Lagos", "Abuja", "Kano", "Kaduna", "Rivers", "Oyo", "Enugu", "Benue", "Borno", "Edo",
+  "Delta", "Anambra", "Cross River", "Akwa Ibom", "Imo", "Osun", "Ekiti", "Kwara", "Ondo", "Bauchi",
+  "Niger", "Plateau", "Kogi", "Sokoto", "Zamfara", "Kebbi", "Taraba", "Yobe", "Adamawa", "Gombe",
+  "Jigawa", "Nasarawa", "Bayelsa", "Ebonyi", "Abia", "Katsina",
 ];
 
-export default function WeatherNigeria() {
-    const [weatherData, setWeatherData] = useState<Record<string, WeatherData | null>>({});
-    const [loading, setLoading] = useState(true);
+export default function NigerianState() {
+  const [weatherData, setWeatherData] = useState<Record<string, WeatherData | null>>({});
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchAllWeather = async () => {
-            setLoading(true);
-            const data: Record<string, WeatherData | null> = {};
-
-            await Promise.all(
-                NIGERIA_STATES.map(async (state) => {
-                    try {
-                        const res = await axios.get(
-                            `https://api.weatherapi.com/v1/current.json?key=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&q=${state}`
-                        );
-                        data[state] = res.data;
-                    } catch (err) {
-                        console.error("Error fetching", state, err);
-                        data[state] = null;
-                    }
-                })
+  useEffect(() => {
+    let active = true;
+    const fetchAllWeather = async () => {
+      const data: Record<string, WeatherData | null> = {};
+      await Promise.all(
+        NIGERIA_STATES.map(async (state) => {
+          try {
+            const response = await axios.get<WeatherData>(
+              "https://api.weatherapi.com/v1/current.json",
+              {
+                params: { key: process.env.NEXT_PUBLIC_WEATHER_API_KEY, q: state },
+                timeout: 12000,
+              },
             );
+            data[state] = response.data;
+          } catch {
+            data[state] = null;
+          }
+        }),
+      );
+      if (active) {
+        setWeatherData(data);
+        setLoading(false);
+      }
+    };
+    void fetchAllWeather();
+    return () => { active = false; };
+  }, []);
 
-            setWeatherData(data);
-            setLoading(false);
-        };
-
-        fetchAllWeather();
-    }, []);
-
-    if (loading) return <LoadingSpinner/>;
-
-    return (
-        <div className="max-w-7xl mx-auto p-4">
-            <h1 className="text-3xl font-bold text-center mb-10">🌍 Weather Report Across Nigeria</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {NIGERIA_STATES.map((state) => {
-                    const weather = weatherData[state];
-                    return (
-                        <div
-                            key={state}
-                            className="bg-gradient-to-br from-blue-100 to-blue-50 border border-blue-200 rounded-2xl shadow-md p-6 hover:shadow-lg transition duration-300 flex flex-col justify-between text-gray-800"
-                        >
-                            <div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <h2 className="text-xl font-bold">{state}</h2>
-                                    {weather && (
-                                        <img
-                                            src={weather.current.condition.icon}
-                                            alt="icon"
-                                            className="w-8 h-8"
-                                        />
-                                    )}
-                                </div>
-                                {weather ? (
-                                    <>
-                                        <div className="text-5xl font-extrabold mb-1">
-                                            {Math.round(weather.current.temp_c)}°C
-                                        </div>
-                                        <p className="text-lg font-medium text-blue-700 mb-4">
-                                            {weather.current.condition.text}
-                                        </p>
-                                        <ul className="text-sm space-y-1">
-                                            <li><strong>Feels like:</strong> {weather.current.feelslike_c}°C</li>
-                                            <li><strong>Humidity:</strong> {weather.current.humidity}%</li>
-                                            <li><strong>Wind:</strong> {weather.current.wind_kph} kph</li>
-                                            <li className="text-gray-500 text-xs mt-2">
-                                                {new Date(weather.location.localtime).toLocaleString()}
-                                            </li>
-                                        </ul>
-                                    </>
-                                ) : (
-                                    <p className="text-red-500">Weather data not available.</p>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+  return (
+    <section className="state-weather-section">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="weather-eyebrow mb-2">Explore by location</p>
+          <h2>Weather across Nigeria</h2>
+          <p className="mt-1 text-sm text-slate-500">Current conditions from cities and state capitals nationwide.</p>
         </div>
-    );
+        <span className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
+          {NIGERIA_STATES.length} locations
+        </span>
+      </div>
+      {loading ? (
+        <div className="weather-panel flex min-h-40 items-center justify-center gap-3 p-8 text-sm text-slate-500">
+          <LoadingSpinner /> Loading state weather reports…
+        </div>
+      ) : (
+        <div className="state-weather-grid">
+          {NIGERIA_STATES.map((state) => {
+            const weather = weatherData[state];
+            return (
+              <article key={state} className="state-weather-card">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700"><MapPinned size={17} /></span>
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-slate-900">{state}</h3>
+                      <p className="text-[10px] text-slate-400">{weather?.location.name ?? "Weather unavailable"}</p>
+                    </div>
+                  </div>
+                  {weather && (
+                    <Image
+                      src={weather.current.condition.icon.startsWith("//") ? `https:${weather.current.condition.icon}` : weather.current.condition.icon}
+                      alt=""
+                      width={40}
+                      height={40}
+                      unoptimized
+                      className="h-10 w-10"
+                    />
+                  )}
+                </div>
+                {weather ? (
+                  <>
+                    <div className="mt-4 flex items-end justify-between gap-2">
+                      <div><p className="text-4xl font-semibold tracking-tight text-slate-950">{Math.round(weather.current.temp_c)}°</p><p className="mt-1 text-xs font-medium text-sky-700">{weather.current.condition.text}</p></div>
+                      <p className="pb-1 text-[10px] text-slate-400">Feels {Math.round(weather.current.feelslike_c)}°C</p>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1.5"><Droplets size={13} className="text-sky-600" />{weather.current.humidity}%</span>
+                      <span className="flex items-center gap-1.5"><Wind size={13} className="text-sky-600" />{Math.round(weather.current.wind_kph)} km/h</span>
+                      <span className="ml-auto flex items-center gap-1.5"><Cloud size={13} />Live</span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-5 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Weather data is temporarily unavailable.</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
 }
