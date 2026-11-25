@@ -140,10 +140,14 @@ export default function WeatherCard() {
   const temperature = (celsius: number) =>
     Math.round(unit === "C" ? celsius : (celsius * 9) / 5 + 32);
   const currentDay = weather?.forecast.forecastday[0];
-  const hourly = useMemo(
-    () => currentDay?.hour.filter((item) => new Date(item.time.replace(" ", "T")).getTime() >= Date.now()).slice(0, 8) ?? [],
-    [currentDay],
-  );
+  const localNow = weather?.location.localtime;
+  const hourly = useMemo(() => {
+    if (!currentDay || !localNow) return [];
+    const locationTime = new Date(localNow.replace(" ", "T")).getTime();
+    return currentDay.hour
+      .filter((item) => new Date(item.time.replace(" ", "T")).getTime() >= locationTime)
+      .slice(0, 8);
+  }, [currentDay, localNow]);
 
   const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
