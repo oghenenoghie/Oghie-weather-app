@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 import {
   Activity,
   ArrowDown,
@@ -170,13 +171,13 @@ export default function WeatherCard() {
   return (
     <main className="mx-auto w-full max-w-[1440px] px-4 pb-14 pt-6 sm:px-7 lg:px-10">
       <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <a href="/" className="flex items-center gap-3" aria-label="Skyline weather home">
+        <Link href="/" className="flex items-center gap-3" aria-label="Skyline weather home">
           <span className="brand-mark"><Sun size={22} /></span>
           <span>
             <span className="block text-lg font-bold tracking-tight text-slate-950">Skyline<span className="text-sky-600">.</span></span>
             <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Weather intelligence</span>
           </span>
-        </a>
+        </Link>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <form onSubmit={handleSearch} className="weather-search">
             <Search size={17} className="shrink-0 text-slate-400" />
