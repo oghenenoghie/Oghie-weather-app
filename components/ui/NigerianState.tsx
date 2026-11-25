@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Image from "next/image";
 import { Cloud, Droplets, MapPinned, Wind } from "lucide-react";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -86,7 +87,16 @@ export default function NigerianState() {
                       <p className="text-[10px] text-slate-400">{weather?.location.name ?? "Weather unavailable"}</p>
                     </div>
                   </div>
-                  {weather && <img src={weather.current.condition.icon.startsWith("//") ? `https:${weather.current.condition.icon}` : weather.current.condition.icon} alt="" className="h-10 w-10" />}
+                  {weather && (
+                    <Image
+                      src={weather.current.condition.icon.startsWith("//") ? `https:${weather.current.condition.icon}` : weather.current.condition.icon}
+                      alt=""
+                      width={40}
+                      height={40}
+                      unoptimized
+                      className="h-10 w-10"
+                    />
+                  )}
                 </div>
                 {weather ? (
                   <>
